@@ -1,7 +1,7 @@
 /**
  * Public Transit
- * Author: Your Name and Carolyn Yao
- * Does this compile? Y/N
+ * Author: Alexis Montes and Carolyn Yao
+ * Does this compile? Y
  */
 
 /**
@@ -24,6 +24,27 @@ public class FastestRoutePublicTransit {
    * @param freq freq[u][v] How frequently is the train that stops at u on its way to v
    * @return shortest travel time between S and T
    */
+
+  /*
+      Alg:
+        find the shortestPath Arr:
+          * Using a modified version of shortest time that was part of originally code
+            set arrays of size of colloumns and fill in values according to values
+            of the passed 2d array
+              -One arr for the array to hold the final path
+              - one to hold the initial train times
+              -- one to hold a record of what stations have been visited
+            return path of shortest length
+        go through array from biggest to smallest location value
+          find the location of Source location in shortestPathLocation
+        check to see if while the train arival time is within our time constranint
+          add the train time to arrival time
+          update values
+        update values for the next possible values for next itteration
+        
+  */
+
+  // not working unkown error is continouly returing 0
   public int myShortestTravelTime(
     int S,
     int T,
@@ -34,8 +55,137 @@ public class FastestRoutePublicTransit {
   ) {
     // Your code along with comments here. Feel free to borrow code from any
     // of the existing method. You can also make new helper methods.
-    return 0;
+
+
+    // uses modified shortestTime
+    // get to betermine the best path
+    int thePath[] = myShortestTime(lengths, S, T);
+    // get the row size for traversals
+    int rowSize = first[0].length - 1;
+    // starting time variable
+    int possibleShortestTime = 0;
+
+    // time variables
+    int nextTrainTime;
+    int theCurrentTime;
+
+    // starting from the largest possible value we keep going backwards until we found the index of the start
+    while( (thePath[rowSize] != S) &&  (rowSize > 0) ) {
+      rowSize--;
+    }
+
+    theCurrentTime = startTime;
+
+    for (int x = rowSize; x >= 1; x--){
+      int currentStationNumber = thePath[x];
+      int nextStationNumber = thePath[x-1];
+      int theTrainArivalTime = first[currentStationNumber][nextStationNumber];
+    
+      int temp = 0;
+      while (theTrainArivalTime < theCurrentTime){
+        theTrainArivalTime = first[currentStationNumber][nextStationNumber] + ( temp * freq[currentStationNumber][nextStationNumber]);
+        temp++;
+      }
+
+      // update variables
+      nextTrainTime = theTrainArivalTime + lengths[currentStationNumber][nextStationNumber];
+      // update the possible time
+      possibleShortestTime = (possibleShortestTime + (nextTrainTime - theCurrentTime));
+      theCurrentTime = nextTrainTime;
+      
+    }
+
+    return possibleShortestTime;
   }
+
+
+  public int[] myShortestTime(int[][] graph, int S, int T){
+    // holds what times are available for trains
+    int[] possibleTimes = initialPossibleTimes(graph[0].length);
+    // first train arrives at 0 for initial start
+    possibleTimes[S] = 0;
+    // list of train stations visited 
+    int[] stationsVisited = new int[graph[0].length];
+    stationsVisited[S] = -1;
+    // array of stations in path, to be returned
+    int[] resultPath = initialPathVar(graph[0].length);
+    // keep track of what is included in the possible values
+    Boolean[] includedInPath = initialBoolValues(graph[0].length);
+
+    // initial value filling in 
+    for (int x = 0; x < graph[0].length - 1; x++){
+      // uses originally method
+      int temp = findNextToProcess(possibleTimes, includedInPath);
+      // check that were including it
+      includedInPath[x] = true;
+
+      for (int y = 0; y < graph[0].length; y++){
+        // conditons to test 
+        boolean isIncludedInPath = includedInPath[y];
+        int pathEdgeIsUnvailable = graph[temp][y];
+        boolean valueSet =  possibleTimes[temp] != Integer.MAX_VALUE;
+        boolean valueSmaller = possibleTimes[temp] + graph[temp][y] < possibleTimes[temp];
+
+        // actual testing of conditions
+        if (!isIncludedInPath && pathEdgeIsUnvailable != 0 && valueSet && valueSmaller){
+          possibleTimes[y] = possibleTimes[temp] + graph[temp][y];
+          stationsVisited[y] = temp;
+        }
+
+      }
+    }
+
+    return findFinalPath(resultPath, stationsVisited, S,T);
+
+  }
+
+  // filter method to find the appropriate path
+  public int[] findFinalPath(int[] path, int[] visited, int S, int T){
+    int[] finalPath = path;
+    int t = T;
+    for (int x = 0; x < T; x++){
+      if(t != S){
+        finalPath[x++] = t;
+        t = visited[t];
+      }
+      finalPath[x] = t;
+    }
+    
+    return finalPath;
+  }
+
+  // initializer method for poosible times
+  public int[] initialPossibleTimes(int size){
+    int[] result = new int[size];
+    result[0] = 0;
+    for (int x = 1; x < size; x++){
+      result[x] = Integer.MAX_VALUE;
+    }
+    return result;
+  }
+
+  // initial method for path array
+  public int[] initialPathVar(int size){
+    int[] result = new int[size];
+
+    for(int x = 0; x < size; x++){
+      result[x] = -1;
+    }
+
+    return result;
+  }
+
+  // initial values for array of if value is checked
+  public Boolean[] initialBoolValues(int size){
+    Boolean[] result = new Boolean[size];
+    for(int x = 0; x < size; x++){
+      result[x] = false;
+    }
+
+    return result;
+  }
+
+
 
   /**
    * Finds the vertex with the minimum time from the source that has not been
@@ -123,6 +273,7 @@ public class FastestRoutePublicTransit {
     };
     FastestRoutePublicTransit t = new FastestRoutePublicTransit();
     t.shortestTime(lengthTimeGraph, 0);
+
 
     // You can create a test case for your implemented method for extra credit below
   }

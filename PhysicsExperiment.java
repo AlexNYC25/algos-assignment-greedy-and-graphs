@@ -1,7 +1,8 @@
+
 /**
  * Physics Experiment
- * Author: Your Name and Carolyn Yao
- * Does this compile or finish running within 5 seconds? Y/N
+ * Author: Alexis Montes and Carolyn Yao
+ * Does this compile or finish running within 5 seconds?  YES and YES
  */
 
 /**
@@ -16,6 +17,131 @@
  * up a custom test case, feel free to use them.
  */
 public class PhysicsExperiment {
+
+  private int currentPerson = 0;
+
+  public void resetPerson(){
+    currentPerson = 0;
+  }
+
+  public void newPerson(int x){
+    currentPerson = x;
+  }
+
+  public int getPerson(){
+    return currentPerson;
+  }
+
+  public boolean isPersonValid(){
+    if(currentPerson != 0){
+      return true;
+    }
+
+    return false;
+  }
+
+  
+  public int howManyCandidates(int[] finalCandidatesarr){
+    int count = 0;
+    for(int x = 1; x < finalCandidatesarr.length; x++){
+        if(finalCandidatesarr[x] == 1){
+            count++;
+        }
+    }
+    //System.out.println("candidate count used " + count);
+    return count;
+}
+
+  public int onlyValue(int[] arr){
+    int location = -1 ;
+    //System.out.println("only value used");
+    for(int x = 0; x < arr.length; x++){
+        if(arr[x] == 1){
+            location = x;
+            return location;
+        }
+    }
+
+    return location+1;
+}
+
+
+public int findBestCandidate(int[] finalCandidates){
+  int candidate = 0;
+
+  // find if there is only one positive value in final candidate then return one 
+  if(finalCandidates[getPerson()] == 1){
+      return getPerson();
+  }
+  /* 
+  if(howManyCandidates(finalCandidates) == 1 ){
+      System.out.println("only one candidate available");
+      candidate = onlyValue(finalCandidates);
+      newPerson(candidate);
+      return candidate;
+  }
+  */
+  else {
+      for(int x = 0; x < finalCandidates.length; x++){
+         
+          if(finalCandidates[x] > finalCandidates[candidate]){
+              candidate = x;
+          }
+      }
+
+      newPerson(candidate);
+      return candidate;
+  }
+}
+
+    // first number equals student second is the job
+    // col to find is the jon
+    public int[] getCertainCol(int colToFind, int[][] toSearch){
+      int[] arr = new int[toSearch.length];
+      int numberOfStudents = toSearch.length;
+
+      // set size of arr
+
+      // main code in here
+      for(int x = 1; x < numberOfStudents ; x++ ){
+          arr[x] = toSearch[x][colToFind];
+      }
+
+      return arr;
+  }
+
+  public int[] findPotential(int[] candidates, int[][] toSearch, int currentjob){
+    int[] arr = new int[candidates.length];
+
+    // itterate through array
+            // if the values is one then find the number of potential jobs
+            // assign value at posioon in new arr
+
+    for(int x = 1; x < candidates.length; x++){
+        if(candidates[x] == 1){
+            int counter = 0;
+            for(int y = currentjob; y < toSearch[0].length; y++ ){
+                if(toSearch[x][y] == 1){
+                    counter++;
+                }
+                
+            }
+            arr[x] = counter;
+        }
+    }
+
+    return arr;
+}
+
+  /*
+    findPossiblePeople(int stepNeededtoBeDone, int[][] tableOfSignups){
+      itterate through int[x][step] 
+        if person x signed up mark as so in 1d arr
+    }
+  */
+  // finds the list of students that are signed up for that possible step
+
+
 
   /**
    * The actual greedy scheduler you will be implementing!
@@ -38,9 +164,18 @@ public class PhysicsExperiment {
     int[][] scheduleTable = new int[numStudents + 1][numSteps + 1];
 
     // Your code goes here
+    for (int step = 0; step < numSteps+1; step++){
+        int bestCandidate = findBestCandidate(findPotential(getCertainCol(step, signUpTable), signUpTable, step));
+      
+        scheduleTable[bestCandidate][step] = 1;
+     
+        resetPerson();
+    }
+    
 
     return scheduleTable;
   }
+
 
   /**
    * Makes the convenient lookup table based on the steps each student says they can do
@@ -152,6 +287,14 @@ public class PhysicsExperiment {
 
     // Experiment 1: Example 1 from README, 3 students, 6 steps:
     int[][] signUpsExperiment1 = {{1, 2, 3, 5}, {2, 3, 4}, {1, 4, 5, 6}};
+    /*
+        Signup table lools like:
+              |0|1|2|3|4|5|6|
+             0|0|0|0|0|0|0|0|
+             1|0|1|1|1|0|1|0|
+             2|0|0|1|1|1|0|0|
+             3|0|1|0|0|1|1|1|
+    */
     pe.makeExperimentAndSchedule(1, 3, 6, signUpsExperiment1);
 
     // Experiment 2: Example 2 from README, 4 students, 8 steps
